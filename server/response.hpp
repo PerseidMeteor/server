@@ -1,64 +1,62 @@
 //
-// reply.hpp
+// response.hpp
 // ~~~~~~~~~
-//
-// Copyright (c) 2003-2022 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
 
-#ifndef HTTP_REPLY_HPP
-#define HTTP_REPLY_HPP
 
+#ifndef HTTP_RESPONSE_HPP
+#define HTTP_RESPONSE_HPP
+
+#include "header.hpp"
+#include <boost/asio.hpp>
 #include <string>
 #include <vector>
-#include <boost/asio.hpp>
-#include "header.hpp"
 
-namespace http {
-namespace server {
-
-/// A reply to be sent to a client.
-struct reply
+namespace http
 {
-  /// The status of the reply.
-  enum status_type
+  namespace server
   {
-    ok = 200,
-    created = 201,
-    accepted = 202,
-    no_content = 204,
-    multiple_choices = 300,
-    moved_permanently = 301,
-    moved_temporarily = 302,
-    not_modified = 304,
-    bad_request = 400,
-    unauthorized = 401,
-    forbidden = 403,
-    not_found = 404,
-    internal_server_error = 500,
-    not_implemented = 501,
-    bad_gateway = 502,
-    service_unavailable = 503
-  } status;
 
-  /// The headers to be included in the reply.
-  std::vector<header> headers;
+    /// A response to be sent to a client.
+    class response
+    {
+    public:
+      /// The status of the response.
+      enum status_type
+      {
+        ok = 200,
+        created = 201,
+        accepted = 202,
+        no_content = 204,
+        multiple_choices = 300,
+        moved_permanently = 301,
+        moved_temporarily = 302,
+        not_modified = 304,
+        bad_request = 400,
+        unauthorized = 401,
+        forbidden = 403,
+        not_found = 404,
+        internal_server_error = 500,
+        not_implemented = 501,
+        bad_gateway = 502,
+        service_unavailable = 503
+      } status;
 
-  /// The content to be sent in the reply.
-  std::string content;
+      /// The headers to be included in the response.
+      std::vector<header> headers;
 
-  /// Convert the reply into a vector of buffers. The buffers do not own the
-  /// underlying memory blocks, therefore the reply object must remain valid and
-  /// not be changed until the write operation has completed.
-  std::vector<boost::asio::const_buffer> to_buffers();
+      /// The content to be sent in the response.
+      std::string content;
 
-  /// Get a stock reply.
-  static reply stock_reply(status_type status);
-};
+      /// Convert the response into a vector of buffers. The buffers do not own the
+      /// underlying memory blocks, therefore the response object must remain valid and
+      /// not be changed until the write operation has completed.
+      std::vector<boost::asio::const_buffer> to_buffers();
 
-} // namespace server
+      /// Get a stock response.
+      static response stock_reply(status_type status);
+    };
+
+  } // namespace server
 } // namespace http
 
-#endif // HTTP_REPLY_HPP
+#endif // HTTP_RESPONSE_HPP

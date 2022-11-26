@@ -1,6 +1,11 @@
 /**
- *
+ *  header.hpp
  */
+#pragma once
+
+#ifndef HTTP_HEADER_HPP
+#define HTTP_HEADER_HPP
+
 #include <map>
 
 namespace http
@@ -14,21 +19,14 @@ namespace http
 
             std::string value;
 
-            std::map<std::string, std::string> h_;
-
         public:
-            header(/* args */);
-            ~header();
+            header(){};
+            
+            ~header(){};
         };
-
-        header::header(/* args */)
-        {
-        }
-
-        header::~header()
-        {
-        }
 
     } // namespace server
 
 } // namespace http
+
+#endif

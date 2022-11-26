@@ -10,6 +10,13 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(${PROJECT_NAME} main.cc)
 
+#Boost COMPONENTS
+find_package(Boost REQUIRED COMPONENTS thread)
+find_package(Boost REQUIRED COMPONENTS system)
+
+
+target_link_libraries(server pthread)
+
 include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
 
 link_directories(${CMAKE_CURRENT_LIST_DIR}/lib)

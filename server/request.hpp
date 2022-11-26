@@ -17,8 +17,7 @@ namespace http
         /// A request received from a client.
         class request
         {
-        private:
-
+        public:
             //
             std::string method;
 

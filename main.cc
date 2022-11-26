@@ -1,17 +1,38 @@
+//
+// main.cpp
+// ~~~~~~~~
+//
+
+#include "server/server.hpp"
+#include <boost/asio.hpp>
 #include <iostream>
-#include <boost/timer.hpp>
+#include <string>
 
-using namespace std;
- 
-int main()
+int main(int argc, char *argv[])
 {
-	boost::timer t;
+	try
+	{
+		// Check command line arguments.
+		if (argc != 4)
+		{
+			std::cerr << "Usage: http_server <address> <port> <doc_root>\n";
+			std::cerr << "  For IPv4, try:\n";
+			std::cerr << "    receiver 0.0.0.0 80 .\n";
+			std::cerr << "  For IPv6, try:\n";
+			std::cerr << "    receiver 0::0 80 .\n";
+			return 1;
+		}
 
-	cout << "max timespan:"<<t.elapsed_max()/3600<<"h"<<endl;
- 
-	cout << "min tmiespan:"<<t.elapsed_min()<<"s"<<endl;
- 
-	cout<<"now time elapsed:"<<t.elapsed()<<"s"<<endl;
+		// Initialise the server.
+		http::server::server s(argv[1], argv[2], argv[3]);
+
+		// Run the server until stopped.
+		s.run();
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << "exception: " << e.what() << "\n";
+	}
 
 	return 0;
 }
