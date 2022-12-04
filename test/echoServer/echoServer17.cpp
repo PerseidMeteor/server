@@ -2,7 +2,10 @@
 // echo_server.cpp
 // ~~~~~~~~~~~~~~~
 
-#include "boost/asio/use_awaitable.hpp"
+// need define bellow,or cannot find symbol awaitable
+#define BOOST_ASIO_HAS_CO_AWAIT
+#define BOOST_ASIO_HAS_STD_COROUTINE
+
 #include "boost/asio/awaitable.hpp"
 #include "boost/asio/co_spawn.hpp"
 #include <boost/asio/detached.hpp>
@@ -19,11 +22,6 @@ using boost::asio::use_awaitable;
 using boost::asio::ip::tcp;
 namespace this_coro = boost::asio::this_coro;
 
-#if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
-#define use_awaitable \
-    boost::asio::use_awaitable_t(__FILE__, __LINE__, __PRETTY_FUNCTION__)
-#endif
-
 awaitable<void> echo(tcp::socket socket)
 {
     try
@@ -32,6 +30,7 @@ awaitable<void> echo(tcp::socket socket)
         for (;;)
         {
             std::size_t n = co_await socket.async_read_some(boost::asio::buffer(data), use_awaitable);
+            std::printf("echo content:%s\n", data);
             co_await async_write(socket, boost::asio::buffer(data, n), use_awaitable);
         }
     }
@@ -45,10 +44,13 @@ awaitable<void> listener()
 {
     auto executor = co_await this_coro::executor;
     tcp::acceptor acceptor(executor, {tcp::v4(), 9999});
+    std::printf("listening in 9999...\n");
+
     for (;;)
     {
         tcp::socket socket = co_await acceptor.async_accept(use_awaitable);
         co_spawn(executor, echo(std::move(socket)), detached);
+        std::printf("co_spawned...\n");
     }
 }
 
@@ -63,6 +65,8 @@ int main()
                            { io_context.stop(); });
 
         co_spawn(io_context, listener(), detached);
+
+        std::printf("running in main...\n");
 
         io_context.run();
     }
