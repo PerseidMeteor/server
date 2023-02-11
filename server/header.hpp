@@ -7,6 +7,7 @@
 #define HTTP_HEADER_HPP
 
 #include <map>
+#include <string>
 
 namespace http
 {
