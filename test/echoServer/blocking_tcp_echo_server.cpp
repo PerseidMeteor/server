@@ -43,6 +43,7 @@ void server(boost::asio::io_context &io_context, unsigned short port)
     tcp::acceptor a(io_context, tcp::endpoint(tcp::v4(), port));
     for (;;)
     {
+        //注释掉只能链接一次，之后的链接 echo server不能回复
         std::thread(session, a.accept()).detach();
     }
 }

@@ -27,7 +27,7 @@ public:
 private:
     void do_read()
     {
-        auto self(shared_from_this());
+        auto self(shared_from_this());//添加引用计数防止释放
         socket_.async_read_some(boost::asio::buffer(data_, max_length),
                                 [this, self](boost::system::error_code ec, std::size_t length)
                                 {
@@ -40,7 +40,7 @@ private:
 
     void do_write(std::size_t length)
     {
-        auto self(shared_from_this());
+        auto self(shared_from_this());//添加引用计数防止释放
         boost::asio::async_write(socket_, boost::asio::buffer(data_, length),
                                  [this, self](boost::system::error_code ec, std::size_t /*length*/)
                                  {
@@ -51,12 +51,12 @@ private:
                                  });
     }
 
-    tcp::socket socket_;
+    tcp::socket socket_;//保持连接
     enum
     {
         max_length = 1024
     };
-    char data_[max_length];
+    char data_[max_length];//存储内容
 };
 
 class server
