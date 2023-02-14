@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
 		std::string port = "7891";
 		std::string doc_root = ".";
 
+		//asd
 		printf("server is running on %s %s,doc_root is <%s> ...", ip.c_str(), port.c_str(), doc_root.c_str());
 
 		// Initialise the server.
