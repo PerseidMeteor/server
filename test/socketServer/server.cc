@@ -30,5 +30,5 @@ void server::do_accept()
 {
 
     acceptor_.async_accept([this](boost::system::error_code ec, boost::asio::ip::tcp::socket sock)
-                           { std::make_shared<connection>(); });
+                           { std::make_shared<connection>(sock)->start(); });
 }

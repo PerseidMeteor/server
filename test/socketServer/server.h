@@ -17,7 +17,7 @@ private:
     boost::asio::ip::tcp::acceptor acceptor_;
 
 public:
-    server() = delete;
+    //server() = delete;
 
     /// @brief initialize
     /// @param ip 
