@@ -40,8 +40,10 @@ namespace http
             std::tuple<result_type, InputIterator> parse(request &req,
                                                          InputIterator begin, InputIterator end)
             {
+                
                 while (begin != end)
                 {
+                    printf("%c", *begin);
                     result_type result = consume(req, *begin++);
                     if (result == good || result == bad)
                         return std::make_tuple(result, begin);

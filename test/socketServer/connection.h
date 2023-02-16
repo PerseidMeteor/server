@@ -10,19 +10,19 @@
 
 #include "boost/asio.hpp"
 #include "vector"
-class connection
+class connection : public std::enable_shared_from_this<connection>
 {
 private:
-    boost::asio::ip::tcp::socket sock_;//keep connection
+    boost::asio::ip::tcp::socket sock_; // keep connection
 
-    std::vector<char> buffer;//storage content
+    char buffer[1024]; // storage content
 
-    void read();//get content from buffer <---client
+    void read(); // get content from buffer <---client
 
-    void write();//write content to buffer --->client
+    void do_my_write(); // write content to buffer --->client
 
 public:
-    //connection() = delete;
+    // connection() = delete;
 
     connection(boost::asio::ip::tcp::socket sock);
 

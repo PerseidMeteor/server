@@ -10,12 +10,17 @@
 
 #include "boost/asio.hpp"
 #include "iostream"
+#include "server.h"
 
 int main(int argc, char *argv[])
 {
     if(argc != 3){
         std::cerr << "usage: ./socketServer <ip> <port>";
+        return 1;
     }
+
+    auto s = server(argv[1], argv[2]);
+    s.run();
 
     return 0;
 }

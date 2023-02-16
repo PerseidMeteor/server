@@ -15,39 +15,43 @@ connection::connection(boost::asio::ip::tcp::socket sock) : sock_(std::move(sock
 
 void connection::start()
 {
-    std::string init_msg_ = "Welcome,tell me your question!\n";
-    boost::asio::write(sock_, boost::asio::buffer(init_msg_),
-                       [this](boost::system::error_code ec)
-                       {
-                           if (!ec)
-                           {
-                               read();
-                           }
-                       });
+    // auto self(shared_from_this());
+    // std::string init_msg_ = "Welcome,tell me your question!\n";
+    // boost::asio::write(sock_, boost::asio::buffer(init_msg_),
+    //                    [this, self](boost::system::error_code ec)
+    //                    {
+    //                        if (!ec)
+    //                        {
+    //                            read();
+    //                        }
+    //                    });
     read();
 }
 
 void connection::read()
 {
+    auto self(shared_from_this());
+
     sock_.async_read_some(boost::asio::buffer(buffer, 1024),
-                            [this](boost::system::error_code ec, std::size_t length)
-                            {
-                                if (!ec)
-                                {
-                                    write();
-                                }
-                            });
+                          [this, self](boost::system::error_code ec, std::size_t length)
+                          {
+                              if (!ec)
+                              {
+                                  do_my_write();
+                              }
+                          });
 }
 
-void connection::write()
+void connection::do_my_write()
 {
-    //auto self(shared_from_this()); // 添加引用计数防止释放
+    auto self(shared_from_this());
+
     boost::asio::async_write(sock_, boost::asio::buffer(buffer, 1024),
-                             [this](boost::system::error_code ec, std::size_t /*length*/)
+                             [this, self](boost::system::error_code ec, std::size_t /*length*/)
                              {
                                  if (!ec)
                                  {
-                                     read();
+                                     this->read();
                                  }
                              });
 }

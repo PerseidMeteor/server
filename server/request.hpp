@@ -28,6 +28,18 @@ namespace http
             int http_version_minor;
 
             std::vector<header> headers;
+
+            public:
+
+                /// @brief get path from request
+                /// @return std::string
+                std::string path() const;
+
+                /// @brief get method from request
+                /// @return std::string
+                std::string method() const;
+
+                
         };
 
     } // namespace server
