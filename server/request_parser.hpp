@@ -6,7 +6,7 @@
 #define HTTP_REQUEST_PARSER_HPP
 
 #include <tuple>
-
+#include "boost/asio/buffer.hpp"
 namespace http
 {
     namespace server
@@ -50,6 +50,10 @@ namespace http
                 }
                 return std::make_tuple(indeterminate, begin);
             }
+
+            /// @brief write by Y
+            /// @return 
+            bool parse_(std::string buffer_);
 
         private:
             /// Handle the next character of input.

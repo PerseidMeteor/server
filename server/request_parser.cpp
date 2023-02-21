@@ -2,7 +2,6 @@
 // request_parser.cpp
 // ~~~~~~~~~~~~~~~~~~
 
-
 #include "request_parser.hpp"
 #include "request.hpp"
 
@@ -323,5 +322,10 @@ namespace http
             return c >= '0' && c <= '9';
         }
 
+        bool parse_(std::string buffer_)
+        {
+            
+            return true;
+        }
     } // namespace server
 } // namespace http
