@@ -5,7 +5,7 @@
 #ifndef HTTP_CONNECTION_HPP
 #define HTTP_CONNECTION_HPP
 
-#include "request.hpp"
+#include "request.h"
 #include "request_handler.hpp"
 #include "request_parser.hpp"
 #include "response.hpp"
@@ -65,6 +65,7 @@ namespace http
 
       /// The response to be sent back to the client.
       response response_;
+
     };
 
     typedef std::shared_ptr<connection> connection_ptr;

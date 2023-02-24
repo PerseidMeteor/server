@@ -3,8 +3,8 @@
 // ~~~~~~~~~~~~~~~~~~~
 
 
-#ifndef HTTP_REQUEST_HANDLER_HPP
-#define HTTP_REQUEST_HANDLER_HPP
+#ifndef HTTP_HANDLER_H
+#define HTTP_HANDLER_H
 
 #include <string>
 
