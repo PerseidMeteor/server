@@ -34,7 +34,6 @@ namespace http
 
         void connection::do_read()
         {
-            std::cout << "do read......" << std::endl;
             auto self(shared_from_this());
             socket_.async_read_some(boost::asio::buffer(buffer_),
                                     [this, self](boost::system::error_code ec, std::size_t bytes_transferred)
@@ -43,21 +42,23 @@ namespace http
                                         {
                                             if (request_.parse(buffer_) == true)
                                             {
-                                                std::cout << "parse succeed......";
                                                 request_handler_.handle_request(request_, response_);
                                                 do_write();
                                             }
                                             else if (request_.parse(buffer_) == false)
                                             {
-                                                std::cout << "parse fail......";
                                                 // response_ = response::stock_reply(response::bad_request);
-                                                response_ = response::stock_reply(response::bad_request);
-                                                // request_handler_.base_handle(request_, response_);
+                                                std::cout << request_.path() << std::endl;
+                                                std::cout << request_.method() << std::endl;
+                                                std::cout << request_.version() << std::endl;
+                                                std::cout << request_.body() << std::endl;
+                                                std::cout << request_.headers().size() << std::endl;
+
+                                                request_handler_.base_handle(request_, response_);
                                                 do_write();
                                             }
                                             else
                                             {
-                                                std::cout << "do read......";
                                                 do_read();
                                             }
                                         }
@@ -70,9 +71,6 @@ namespace http
 
         void connection::do_write()
         {
-            std::cout << "do write......" << std::endl;
-            std::cout << response_.headers[0].name<< response_.headers[0].value<< std::endl;
-
             auto self(shared_from_this());
             boost::asio::async_write(socket_, response_.to_buffers(),
                                      [this, self](boost::system::error_code ec, std::size_t)

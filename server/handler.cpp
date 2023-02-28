@@ -114,8 +114,6 @@ namespace http
 
         void handler::base_handle(const request &req, response &rep)
         {
-            std::cout << "base_handle" << std::endl;
-
             rep.status = response::ok;
             rep.content = "supoort V2.0";
             rep.headers.resize(2);

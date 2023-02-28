@@ -84,10 +84,13 @@ namespace http
                         return false; // bad request
 
                     break;
+                case FINISH:
+                    break;
                 }
             }
             
             // std::printf("****%s", content.c_str());
+            return true;
         }
 
         bool request::parse_request_line_(std::string content)
@@ -129,6 +132,7 @@ namespace http
             // ParsePost_();
             state_ = FINISH;
             // LOG_DEBUG("Body:%s, len:%d", line.c_str(), line.size());
+            return true;
         }
 
     }
