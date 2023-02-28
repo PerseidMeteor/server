@@ -1,11 +1,11 @@
 //
-// request_handler.cpp
+// handler.cpp
 // ~~~~~~~~~~~~~~~~~~~
 
 
 #include "handler.h"
 #include "mime_types.hpp"
-#include "request.hpp"
+#include "request.h"
 #include "response.hpp"
 #include <fstream>
 #include <sstream>
@@ -16,16 +16,16 @@ namespace http
     namespace server
     {
 
-        request_handler::request_handler(const std::string &doc_root)
+        handler::handler(const std::string &doc_root)
             : doc_root_(doc_root)
         {
         }
 
-        void request_handler::handle_request(const request &req, response &rep)
+        void handler::handle_request(const request &req, response &rep)
         {
             // Decode url to path.
             std::string request_path;
-            if (!url_decode(req.uri, request_path))
+            if (!url_decode(req.path(), request_path))
             {
                 rep = response::stock_reply(response::bad_request);
                 return;
@@ -74,7 +74,7 @@ namespace http
             rep.headers[1].value = mime_types::extension_to_type(extension);
         }
 
-        bool request_handler::url_decode(const std::string &in, std::string &out)
+        bool handler::url_decode(const std::string &in, std::string &out)
         {
             out.clear();
             out.reserve(in.size());

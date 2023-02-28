@@ -6,7 +6,7 @@
 
 #include "connection.hpp"
 #include "connection_manager.hpp"
-#include "request_handler.hpp"
+#include "handler.h"
 #include <boost/asio.hpp>
 #include <string>
 
@@ -50,7 +50,7 @@ namespace http
             connection_manager connection_manager_;
 
             /// The handler for all incoming requests.
-            request_handler request_handler_;
+            handler request_handler_;
         };
 
     } // namespace server

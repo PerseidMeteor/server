@@ -35,6 +35,8 @@ namespace http
 
             std::string version_; // vision
 
+            std::string uri;
+
             std::unordered_map<std::string, std::string> headers_;//headers
 
             std::string body_;

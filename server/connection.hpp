@@ -6,7 +6,7 @@
 #define HTTP_CONNECTION_HPP
 
 #include "request.h"
-#include "request_handler.hpp"
+#include "handler.h"
 #include "request_parser.hpp"
 #include "response.hpp"
 #include <array>
@@ -30,7 +30,7 @@ namespace http
 
       /// Construct a connection with the given socket.
       explicit connection(boost::asio::ip::tcp::socket socket,
-                          connection_manager &manager, request_handler &handler);
+                          connection_manager &manager, handler &handler);
 
       /// Start the first asynchronous operation for the connection.
       void start();
@@ -52,7 +52,7 @@ namespace http
       connection_manager &connection_manager_;
 
       /// The handler used to process the incoming request.
-      request_handler &request_handler_;
+      handler &request_handler_;
 
       /// Buffer for incoming data.
       std::array<char, 8192> buffer_;
