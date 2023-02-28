@@ -29,8 +29,8 @@ namespace http
             /// Handle a request and produce a response.
             void handle_request(const request &req, response &rep);
 
-            /// TODO:fix later my handle
-            void myhandle(const request &req, response &rep);
+            /// base handle
+            void base_handle(const request &req, response &rep);
 
         private:
             /// The directory containing the files to be served.

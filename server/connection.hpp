@@ -7,7 +7,6 @@
 
 #include "request.h"
 #include "handler.h"
-#include "request_parser.hpp"
 #include "response.hpp"
 #include <array>
 #include <boost/asio.hpp>
@@ -59,9 +58,6 @@ namespace http
 
       /// The incoming request.
       request request_;
-
-      /// The parser for the incoming request.
-      request_parser request_parser_;
 
       /// The response to be sent back to the client.
       response response_;

@@ -3,13 +3,12 @@
 // ~~~~~~~~~~~~~~
 //
 
-
 #include "connection.hpp"
 #include "connection_manager.hpp"
 #include "handler.h"
-#include <utility>
-#include <vector>
-
+#include "iostream"
+#include "utility"
+#include "vector"
 namespace http
 {
     namespace server
@@ -35,41 +34,32 @@ namespace http
 
         void connection::do_read()
         {
+            std::cout << "do read......" << std::endl;
             auto self(shared_from_this());
             socket_.async_read_some(boost::asio::buffer(buffer_),
                                     [this, self](boost::system::error_code ec, std::size_t bytes_transferred)
                                     {
                                         if (!ec)
                                         {
-                                            request request_;
-                                            response response_;
-                                            if(request_.parse(buffer_) == true){
+                                            if (request_.parse(buffer_) == true)
+                                            {
+                                                std::cout << "parse succeed......";
                                                 request_handler_.handle_request(request_, response_);
                                                 do_write();
                                             }
-                                            else{
+                                            else if (request_.parse(buffer_) == false)
+                                            {
+                                                std::cout << "parse fail......";
+                                                // response_ = response::stock_reply(response::bad_request);
                                                 response_ = response::stock_reply(response::bad_request);
+                                                // request_handler_.base_handle(request_, response_);
                                                 do_write();
                                             }
-                                            
-                                            // request_parser::result_type result;
-                                            // std::tie(result, std::ignore) = request_parser_.parse(
-                                            //     request_, buffer_.data(), buffer_.data() + bytes_transferred);
-
-                                            // if (result == request_parser::good)
-                                            // {
-                                            //     request_handler_.handle_request(request_, response_);
-                                            //     do_write();
-                                            // }
-                                            // else if (result == request_parser::bad)
-                                            // {
-                                            //     response_ = response::stock_reply(response::bad_request);
-                                            //     do_write();
-                                            // }
-                                            // else
-                                            // {
-                                            //     do_read();
-                                            // }
+                                            else
+                                            {
+                                                std::cout << "do read......";
+                                                do_read();
+                                            }
                                         }
                                         else if (ec != boost::asio::error::operation_aborted)
                                         {
@@ -80,6 +70,9 @@ namespace http
 
         void connection::do_write()
         {
+            std::cout << "do write......" << std::endl;
+            std::cout << response_.headers[0].name<< response_.headers[0].value<< std::endl;
+
             auto self(shared_from_this());
             boost::asio::async_write(socket_, response_.to_buffers(),
                                      [this, self](boost::system::error_code ec, std::size_t)

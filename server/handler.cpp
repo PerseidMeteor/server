@@ -2,15 +2,14 @@
 // handler.cpp
 // ~~~~~~~~~~~~~~~~~~~
 
-
 #include "handler.h"
 #include "mime_types.hpp"
 #include "request.h"
 #include "response.hpp"
-#include <fstream>
-#include <sstream>
-#include <string>
-
+#include "fstream"
+#include "sstream"
+#include "string"
+#include "iostream"
 namespace http
 {
     namespace server
@@ -111,6 +110,19 @@ namespace http
                 }
             }
             return true;
+        }
+
+        void handler::base_handle(const request &req, response &rep)
+        {
+            std::cout << "base_handle" << std::endl;
+
+            rep.status = response::ok;
+            rep.content = "supoort V2.0";
+            rep.headers.resize(2);
+            rep.headers[0].name = "Content-Length";
+            rep.headers[0].value = std::to_string(rep.content.size());
+            rep.headers[1].name = "Content-Type";
+            rep.headers[1].value = mime_types::extension_to_type("text/html");
         }
 
     } // namespace server
