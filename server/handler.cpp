@@ -20,7 +20,7 @@ namespace http
         {
         }
 
-        void handler::handle_request(const request &req, response &rep)
+        void handler::getFile(const request &req, response &rep)
         {
             // Decode url to path.
             std::string request_path;

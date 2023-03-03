@@ -27,7 +27,7 @@ namespace http
             explicit handler(const std::string &doc_root);
 
             /// Handle a request and produce a response.
-            void handle_request(const request &req, response &rep);
+            void getFile(const request &req, response &rep);
 
             /// base handle
             void base_handle(const request &req, response &rep);

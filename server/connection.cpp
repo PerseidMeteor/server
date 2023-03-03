@@ -42,7 +42,7 @@ namespace http
                                         {
                                             if (request_.parse(buffer_) == true)
                                             {
-                                                request_handler_.handle_request(request_, response_);
+                                                request_handler_.getFile(request_, response_);
                                                 do_write();
                                             }
                                             else if (request_.parse(buffer_) == false)
