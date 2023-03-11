@@ -15,7 +15,7 @@ find_package(Boost REQUIRED COMPONENTS thread)
 find_package(Boost REQUIRED COMPONENTS system)
 
 
-target_link_libraries(server pthread)
+target_link_libraries(server pthread boost_fiber boost_context boost_coroutine)
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
 

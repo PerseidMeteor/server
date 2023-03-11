@@ -4,16 +4,34 @@
 #ifndef HTTP_SERVER_HPP
 #define HTTP_SERVER_HPP
 
+#include "boost/asio.hpp"
+#include "boost/fiber/all.hpp"
+#include "string"
+
 #include "connection.hpp"
 #include "connection_manager.hpp"
 #include "handler.h"
-#include <boost/asio.hpp>
-#include <string>
+
+typedef int socket_type;
+
 
 namespace http
 {
     namespace server
     {
+
+        struct HttpContext
+        {
+            boost::asio::ip::tcp::endpoint remote_endpoint;
+            std::string path; // 不包含问号后参数
+            // boost::smatch path_params;
+            // CaseInsensitiveMultimap query_params;
+
+            // StrRequest req;
+            request request_;
+            // StrResponse res;
+            response response_;
+        };
 
         /// The top-level class of the HTTP server.
         class server
@@ -51,6 +69,27 @@ namespace http
 
             /// The handler for all incoming requests.
             handler request_handler_;
+
+            // thread count
+            int m_thread_count_ = 1;
+
+            // thread pool
+            std::vector<std::thread> m_thread_;
+
+            // manage fiber
+            boost::fibers::fiber m_accept_fiber_;
+
+            // linsten endpoint
+            boost::asio::ip::tcp::endpoint m_listen_ep_;
+
+            // mutex
+            boost::fibers::mutex m_session_mutex_;
+
+            // 协程调度
+            boost::fibers::condition_variable_any m_session_cnd;
+
+            // running flag
+            std::atomic_bool m_running;
         };
 
     } // namespace server
