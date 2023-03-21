@@ -56,14 +56,25 @@ private:
 
     bool isOpen_;
  
-    vector<char> buff_;
+    std::vector<char> buff_;
 
+    //write pos
+    size_t buffToWrite_ = 0;
+
+    //read pos
+    size_t curBuffPos_ = 0;
+
+    //log level
     int level_;
+
     bool isAsync_;
 
     FILE* fp_;
+
     std::unique_ptr<BlockDeque<std::string>> deque_; 
+
     std::unique_ptr<std::thread> writeThread_;
+
     std::mutex mtx_;
 };
 
