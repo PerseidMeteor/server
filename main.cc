@@ -17,13 +17,14 @@ int main(int argc, char *argv[])
 	const std::string port = "7891";
 	const std::string doc_root = ".";
 
+	auto logger = Log::Instance();
+	logger->init(1, "./log", ".log", 0);
+
 	LOG_INFO("========== Server init ==========");
 
 
 	try
 	{
-			LOG_INFO("========== Server init ==========");
-
 		// Initialise the server.
 		http::server::server s(ip, port, doc_root);
 

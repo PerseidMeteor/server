@@ -9,6 +9,7 @@
  */
 
 #include "log.h"
+#include "iostream"
 
 using namespace std;
 
@@ -137,7 +138,6 @@ void Log::write(int level, const char *format, ...)
         {
             snprintf(newFile, LOG_NAME_LEN - 72, "%s/%s-%d%s", path_, tail, (lineCount_ / MAX_LINES), suffix_);
         }
-
         locker.lock();
         flush();
         fclose(fp_);
@@ -148,9 +148,23 @@ void Log::write(int level, const char *format, ...)
     {
         unique_lock<mutex> locker(mtx_);
         lineCount_++;
-        int n = snprintf(buff_.begin().base() + buffToWrite_, 128, "%d-%02d-%02d %02d:%02d:%02d.%06ld ",
+        
+        std::cout << buff_.size() << std::endl;
+        for(auto& x:buff_)
+        {
+            std::cout << x << std::endl;
+        }
+        buff_.resize(1024);
+
+        int n = snprintf(&(*buff_.begin()) + buffToWrite_, 128, "%d-%02d-%02d %02d:%02d:%02d.%06ld ",
                          t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
                          t.tm_hour, t.tm_min, t.tm_sec, now.tv_usec);
+
+        std::cout << buff_.size() << std::endl;
+        std::cout << "buffcontent:";
+        for (auto &x : buff_)
+            std::cout << x;
+        
 
         // buff_.HasWritten(n);
         // changed by breeze
@@ -181,6 +195,20 @@ void Log::write(int level, const char *format, ...)
             //peek
             fputs(buff_.begin().base() + curBuffPos_, fp_);
         }
+        
+        fp_ = fopen("/root/server/build/log/2023_04_08.log", "w+");
+        
+        std::cout << buff_.size() << std::endl;
+        std::cout << "buffcontent:";
+        for (auto &x : buff_)
+            std::cout << x;
+        std::cout << std::endl;
+        buff_[10] = '\0';
+        std::cout << "data:" << buff_.data() << std::endl;
+        std::vector<char> abc = {'a','b','c'};
+        std::cout <<"data:"<<abc.data()<<std::endl;
+
+        fputs(abc.data(), fp_);
         // buff_.RetrieveAll();
         buff_.assign(0,buff_.size());
         buffToWrite_ = 0;
