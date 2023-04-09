@@ -64,9 +64,11 @@ void Log::init(int level = 1, const char *path, const char *suffix,
         isAsync_ = true;
         if (!deque_)
         {
+            //c++ 11,in c++17 can use std::make_unique
             unique_ptr<BlockDeque<std::string>> newDeque(new BlockDeque<std::string>);
             deque_ = move(newDeque);
 
+            //c++ 11,in c++17 can use std::make_unique
             std::unique_ptr<std::thread> NewThread(new thread(FlushLogThread));
             writeThread_ = move(NewThread);
         }
@@ -90,9 +92,13 @@ void Log::init(int level = 1, const char *path, const char *suffix,
 
     {
         lock_guard<mutex> locker(mtx_);
-        //reRetrieveAll
+
+        // init buffer
+        buff_.resize(BUFFER_SIZE);
         buff_.assign(buff_.size(), 0); // set zero
         buffToWrite_ = 0;
+        buffToRead_ = 0;
+
         if (fp_)
         {
             flush();
@@ -118,7 +124,7 @@ void Log::write(int level, const char *format, ...)
     struct tm t = *sysTime;
     va_list vaList;
 
-    /* 日志日期 日志行数 */
+    /* time and lines */
     if (toDay_ != t.tm_mday || (lineCount_ && (lineCount_ % MAX_LINES == 0)))
     {
         unique_lock<mutex> locker(mtx_);
@@ -148,70 +154,53 @@ void Log::write(int level, const char *format, ...)
     {
         unique_lock<mutex> locker(mtx_);
         lineCount_++;
-        
-        std::cout << buff_.size() << std::endl;
-        for(auto& x:buff_)
-        {
-            std::cout << x << std::endl;
-        }
-        buff_.resize(1024);
 
+        //write time to buffer
         int n = snprintf(&(*buff_.begin()) + buffToWrite_, 128, "%d-%02d-%02d %02d:%02d:%02d.%06ld ",
                          t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
                          t.tm_hour, t.tm_min, t.tm_sec, now.tv_usec);
-
-        std::cout << buff_.size() << std::endl;
-        std::cout << "buffcontent:";
-        for (auto &x : buff_)
-            std::cout << x;
-        
-
-        // buff_.HasWritten(n);
-        // changed by breeze
         buffToWrite_ += n;
+
+        //write log level to buffer
         AppendLogLevelTitle_(level);
 
+        //write log content to buffer
         va_start(vaList, format);
         int m = vsnprintf(buff_.begin().base() + buffToWrite_, buff_.size() - buffToWrite_, format, vaList);
         va_end(vaList);
 
-        // buff_.HasWritten(m)
-        // changed by breeze
         buffToWrite_ += m;
 
-        // buff_.Append("\n\0", 2);
-        // change to std::copy,by breeze
-        std::copy("\n\0", "\n\0" + 2, buff_.begin());
 
+        //add Wrap delimiter
+        std::copy("\n\0", "\n\0" + 2, buff_.begin() + buffToWrite_);
+
+        /*-------------write buffer to file-----------------*/
+
+        //if async, push buffer to deque
         if (isAsync_ && deque_ && !deque_->full())
         {
             // deque_->push_back(buff_.RetrieveAllToStr());
-            std::string str(buff_.begin().base() + curBuffPos_, buffToWrite_ - curBuffPos_);
-            buff_.assign(0, buff_.size());
+            std::string str(buff_.begin().base() + buffToRead_, buffToWrite_ - buffToRead_);
+            std::cout << "push back" << str << std::endl;
             deque_->push_back(str);
+
+            buff_.assign(0, buff_.size());
+            buffToWrite_ = 0;
+            buffToRead_ = 0;
         }
+
+        //if not async, write buffer to file
         else
         {
-            //peek
-            fputs(buff_.begin().base() + curBuffPos_, fp_);
+            // write buffer into fp_,from readpos to end
+            fputs(buff_.begin().base() + buffToRead_, fp_);
         }
-        
-        fp_ = fopen("/root/server/build/log/2023_04_08.log", "w+");
-        
-        std::cout << buff_.size() << std::endl;
-        std::cout << "buffcontent:";
-        for (auto &x : buff_)
-            std::cout << x;
-        std::cout << std::endl;
-        buff_[10] = '\0';
-        std::cout << "data:" << buff_.data() << std::endl;
-        std::vector<char> abc = {'a','b','c'};
-        std::cout <<"data:"<<abc.data()<<std::endl;
 
-        fputs(abc.data(), fp_);
         // buff_.RetrieveAll();
-        buff_.assign(0,buff_.size());
+        buff_.assign(0, buff_.size());
         buffToWrite_ = 0;
+        buffToRead_ = 0;
     }
 }
 
@@ -220,27 +209,25 @@ void Log::AppendLogLevelTitle_(int level)
     switch (level)
     {
     case 0:
-        // buff_.Append("[debug]: ", 9);
-        std::copy("[debug]: ", "[debug]: " + 9, buff_.begin());
+        std::copy("[debug]: ", "[debug]: " + 8, buff_.begin() + buffToWrite_);//add level
+        buffToWrite_ += 8;//move buffToWrite_
         break;
     case 1:
-        // buff_.Append("[info] : ", 9);
-        std::copy("[debug]: ", "[debug]: " + 9, buff_.begin());
-
+        std::copy("[info]: ", "[info]: " + 8, buff_.begin() + buffToWrite_);
+        buffToWrite_ += 8;
         break;
     case 2:
-        // buff_.Append("[warn] : ", 9);
-        std::copy("[warn]: ", "[warn]: " + 9, buff_.begin());
-
+        std::copy("[warn]: ", "[warn]: " + 8, buff_.begin() + buffToWrite_);
+        buffToWrite_ += 8;
         break;
     case 3:
-        // buff_.Append("[error]: ", 9);
-        std::copy("[error]: ", "[error]: " + 9, buff_.begin());
-
+        std::copy("[error]: ", "[error]: " + 8, buff_.begin() + buffToWrite_);
+        buffToWrite_ += 8;
         break;
+
     default:
-        // buff_.Append("[info] : ", 9);
-        std::copy("[info]: ", "[info]: " + 9, buff_.begin());
+        std::copy("[info]: ", "[info]: " + 8, buff_.begin() + buffToWrite_);
+        buffToWrite_ += 8;
         break;
     }
 }
@@ -258,9 +245,10 @@ void Log::AsyncWrite_()
 {
     string str = "";
     while (deque_->pop(str))
-    {
+    {        
         lock_guard<mutex> locker(mtx_);
         fputs(str.c_str(), fp_);
+        flush();
     }
 }
 

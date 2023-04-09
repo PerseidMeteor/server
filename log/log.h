@@ -62,7 +62,7 @@ private:
     size_t buffToWrite_ = 0;
 
     //read pos
-    size_t curBuffPos_ = 0;
+    size_t buffToRead_ = 0;
 
     //log level
     int level_;
