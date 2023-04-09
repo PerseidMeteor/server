@@ -18,10 +18,9 @@ int main(int argc, char *argv[])
 	const std::string doc_root = ".";
 
 	auto logger = Log::Instance();
-	logger->init(1, "./log", ".log", 1024);
+	logger->init(0, "./log", ".log", 0);
 
-	LOG_INFO("========== Server init ==========\n");
-	LOG_INFO("========== Server init2 ==========\n");
+	//LOG_INFO("========== Server init2 ==========");
 
 	try
 	{

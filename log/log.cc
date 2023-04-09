@@ -174,6 +174,8 @@ void Log::write(int level, const char *format, ...)
 
         //add Wrap delimiter
         std::copy("\n\0", "\n\0" + 2, buff_.begin() + buffToWrite_);
+        buffToWrite_ += 2;
+
 
         /*-------------write buffer to file-----------------*/
 
@@ -182,7 +184,6 @@ void Log::write(int level, const char *format, ...)
         {
             // deque_->push_back(buff_.RetrieveAllToStr());
             std::string str(buff_.begin().base() + buffToRead_, buffToWrite_ - buffToRead_);
-            std::cout << "push back" << str << std::endl;
             deque_->push_back(str);
 
             buff_.assign(0, buff_.size());
@@ -209,7 +210,7 @@ void Log::AppendLogLevelTitle_(int level)
     switch (level)
     {
     case 0:
-        std::copy("[debug]: ", "[debug]: " + 8, buff_.begin() + buffToWrite_);//add level
+        std::copy("[debug]: ", "[debug]: " + 9, buff_.begin() + buffToWrite_);//add level
         buffToWrite_ += 8;//move buffToWrite_
         break;
     case 1:
@@ -221,7 +222,7 @@ void Log::AppendLogLevelTitle_(int level)
         buffToWrite_ += 8;
         break;
     case 3:
-        std::copy("[error]: ", "[error]: " + 8, buff_.begin() + buffToWrite_);
+        std::copy("[error]: ", "[error]: " + 9, buff_.begin() + buffToWrite_);
         buffToWrite_ += 8;
         break;
 
@@ -248,6 +249,8 @@ void Log::AsyncWrite_()
     {        
         lock_guard<mutex> locker(mtx_);
         fputs(str.c_str(), fp_);
+        //TODO:if not flush, the log will not be written into file when async write,why?
+        //and LOG_BASE also called log->flush(),but not work,need settle.
         flush();
     }
 }

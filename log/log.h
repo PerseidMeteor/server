@@ -78,6 +78,8 @@ private:
     std::mutex mtx_;
 };
 
+//can not delete log->flush() in LOG_BASE,or will cause log lost,
+//the log info will not be written into log file when maxQueueCapacity is 0
 #define LOG_BASE(level, format, ...) \
     do {\
         Log* log = Log::Instance();\
