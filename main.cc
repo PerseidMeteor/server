@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 	try
 	{
 		// Initialise the server.
-		http::server::server s(ip, port, doc_root);
+		http::server::server s(ip, port, doc_root,2);
 
 		std::cerr << "server is running on ip: " << ip << ", port: " << port << ", doc directory root is:" << doc_root << std::endl;
 

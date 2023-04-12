@@ -23,13 +23,16 @@ namespace http
             fcntl(s, F_SETFD, flags);
         }
 
-        server::server(const std::string &address, const std::string &port,
-                       const std::string &doc_root)
+        server::server(const std::string &address,
+                       const std::string &port,
+                       const std::string &doc_root,
+                       int thread_count)
             : io_context_(1),
               signals_(io_context_),
               acceptor_(io_context_),
               connection_manager_(),
-              request_handler_(doc_root)
+              request_handler_(doc_root),
+              m_thread_count_(thread_count)
         {
             // Register to handle the signals that indicate when the server should exit.
             // It is safe to register for the same signal multiple times in a program,
@@ -54,18 +57,29 @@ namespace http
             do_accept();
         }
 
+        server::~server()
+        {
+            m_thread_pool_.join();
+        }
+        
         void server::run()
         {
-
-            // boost::fibers::fiber([this]()
-            //                      { do_accept(); })
-            //     .detach();
-
             // The io_context::run() call will block until all asynchronous operations
             // have finished. While the server is running, there is always at least one
             // asynchronous operation outstanding: the asynchronous accept call waiting
             // for new incoming connections.
-            io_context_.run();
+
+            for (std::size_t i = 0; i < m_thread_count_; ++i)
+            {
+                // for boost::asio::thread_pool
+                boost::asio::post(m_thread_pool_, [this]()
+                                  { io_context_.run(); });
+
+                // for std::thread
+                // m_thread_pool_.emplace_back([this]()
+                //                             { io_context_.run(); });
+            }
+            // io_context_.run();
         }
 
         void server::do_accept()
@@ -78,19 +92,33 @@ namespace http
             // 当新的连接到来时,async_accept 的回调会在一个新的协程中执行,这个回调会启动一个新的协程来处理连接,而不是直接在主协程中处理.
             // 主协程在等待新连接到来时,没有占用任何 CPU 资源,等待期间可以用于执行其他任务.当新连接到来时,操作系统会通知 Boost.ASIO 库,
             // 并唤醒主协程,主协程会再次调用 async_accept 开始等待下一个连接.
+
             boost::asio::spawn(io_context_, [this](boost::asio::yield_context yield_)
                                {
             for (;;)
             {
-                boost::system::error_code ec;
                 boost::asio::ip::tcp::socket socket(io_context_);
+                boost::system::error_code ec;
                 acceptor_.async_accept(socket, yield_[ec]);
                 if (!ec)
                 {
-                    auto conn = std::make_shared<http::server::connection>(std::move(socket),
-                                                                             connection_manager_,
-                                                                             request_handler_);
-                    connection_manager_.start(conn);
+                    boost::asio::spawn(io_context_, [this, conn = std::make_shared<http::server::connection>(std::move(socket), connection_manager_, request_handler_)]
+                        (boost::asio::yield_context yield_)
+                    {
+                        connection_manager_.start(conn);
+                        // conn->handle_request(yield_);
+                        // connection_manager_.stop(conn);
+                    });
+                }
+                else if (ec == boost::asio::error::operation_aborted)
+                {
+                    // The operation was cancelled, e.g. because the server was stopped.
+                    break;
+                }
+                else
+                {
+                    // Handle the error.
+                    std::cerr << "Error accepting connection: " << ec.message() << std::endl;
                 }
             } });
         }
@@ -103,8 +131,18 @@ namespace http
                     // The server is stopped by cancelling all outstanding asynchronous
                     // operations. Once all operations have finished the io_context::run()
                     // call will exit.
-                    acceptor_.close();
-                    connection_manager_.stop_all();
+
+                    acceptor_.close(); // close acceptor
+
+                    connection_manager_.stop_all(); // stop all connection
+
+                    for (std::size_t i = 0; i < m_thread_count_; ++i)
+                    {
+                        boost::asio::post(m_thread_pool_, [this]()
+                                          { io_context_.stop(); });
+                    }
+
+                    std::cout << "server stop..." << std::endl;
                 });
         }
 

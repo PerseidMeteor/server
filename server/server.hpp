@@ -40,13 +40,21 @@ namespace http
             server(const server &) = delete;
             server &operator=(const server &) = delete;
 
-            /// Construct the server to listen on the specified TCP address and port, and
-            /// serve up files from the given directory.
-            explicit server(const std::string &address, const std::string &port,
-                            const std::string &doc_root);
+            /// @brief the server to listen on the specified TCP address and port, and serve up files from the given directory.
+            /// @param address The address on which the server is to listen.
+            /// @param port The port on which the server is to listen.
+            /// @param doc_root The directory containing the files to be served.
+            /// @param thread_count The number of threads that will call io_context::run().
+            explicit server(const std::string &address, 
+                            const std::string &port,
+                            const std::string &doc_root,
+                            int thread_count = 1);
 
             /// Run the server's io_context loop.
             void run();
+
+            /// Destructor
+            ~server();
 
         private:
             /// Perform an asynchronous accept operation.
@@ -71,11 +79,11 @@ namespace http
             handler request_handler_;
 
             // thread count
-            int m_thread_count_ = 1;
+            size_t m_thread_count_ = 1;
 
-            // thread pool
-            std::vector<std::thread> m_thread_;
-
+            // thread pool           
+            boost::asio::thread_pool m_thread_pool_;
+            
             // manage fiber
             boost::fibers::fiber m_accept_fiber_;
 
